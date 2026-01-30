@@ -1,0 +1,30 @@
+<resources>
+    <string name="app_name">FlowSense</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="new_user_register_here">New user? Register here</string>
+    <string name="login">Login</string>
+    <string name="remember_me">Remember Me</string>
+    <string name="app_logo">App logo</string>
+    <string name="enter_your_password">Enter your password</string>
+    <string name="enter_your_email">Enter your email</string>
+    <string name="back_to_login">I have account to Login</string>
+    <string name="create_account_now">Create Account Now</string>
+    <string name="circle_in_days_21_or_28">Circle in Days (21 or 28)</string>
+    <string name="enter_your_second_name">Enter your second name</string>
+    <string name="enter_your_first_name">Enter your first name</string>
+    <string-array name="bleeding_intensity">
+        <item>Select Intensity</item>
+        <item>Light</item>
+        <item>Medium</item>
+        <item>Heavy</item>
+    </string-array>
+
+    <string-array name="mucus_consistency">
+        <item>Select Mucus type</item>
+        <item>Dry</item>
+        <item>Sticky</item>
+        <item>Creamy</item>
+        <item>Watery</item>
+        <item>Egg white (stretchy)</item>
+    </string-array>
+</resources>
