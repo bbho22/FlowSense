@@ -1,12 +1,20 @@
 package com.example.flowsense;
 import androidx.appcompat.widget.Toolbar;
+
+import android.Manifest;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -61,6 +69,26 @@ public class Dashboard extends AppCompatActivity {
         tvDate = findViewById(R.id.tv_date);
         tvInfo = findViewById(R.id.tv_info);
 
+        // Notification permission (Android 13+)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.POST_NOTIFICATIONS}, 101);
+            }
+        }
+
+        // Notification channel (Android 8+)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    "cycle_channel",
+                    "Cycle Notifications",
+                    NotificationManager.IMPORTANCE_DEFAULT
+            );
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            manager.createNotificationChannel(channel);
+        }
+
         String safeEmailKey = getIntent().getStringExtra("safeEmailKey");
 
         // Point to the correct user node in Realtime Database
@@ -73,9 +101,9 @@ public class Dashboard extends AppCompatActivity {
             if (snapshot.exists()) {
                 String firstName = snapshot.child("firstName").getValue(String.class);
                 String email = snapshot.child("email").getValue(String.class);
-                Integer cycleVal = snapshot.child("cycleLength").getValue(Integer.class);
+                Long cycleVal = snapshot.child("cycleLength").getValue(Long.class);
                 if (cycleVal != null) {
-                    cycleLength = cycleVal; // 👈 set class field
+                    cycleLength = cycleVal.intValue(); // 👈 set class field
                 }
 
                 // Update UI
@@ -83,7 +111,7 @@ public class Dashboard extends AppCompatActivity {
                 tvInfo.setText("Email: " + email + " | Cycle Days: " + cycleLength);
 
                 // Show today’s date dynamically
-                String today = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(new Date());
+                String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
                 tvDate.setText("Date: " + today);
             }
         }).addOnFailureListener(e -> {
@@ -110,7 +138,7 @@ public class Dashboard extends AppCompatActivity {
         btnSymptoms.setOnClickListener(v -> {
             CycleUtils.getCurrentCycleId(Dashboard.this, dbRef, new CycleUtils.OnCycleCheckListener() {
                 @Override
-                public void onCycleFound(String cycleId) {
+                public void onCycleFound(String cycleId, int cycleLength, int periodLength) {
                     Intent intent = new Intent(Dashboard.this, Symptom.class);
                     intent.putExtra("safeEmailKey", safeEmailKey);
                     intent.putExtra("cycleId", cycleId);
@@ -122,17 +150,17 @@ public class Dashboard extends AppCompatActivity {
                     // Toast already shown in helper
                 }
             });
-
         });
 
         btnFertility.setOnClickListener(v -> {
             CycleUtils.getCurrentCycleId(Dashboard.this, dbRef, new CycleUtils.OnCycleCheckListener() {
                 @Override
-                public void onCycleFound(String cycleId) {
+                public void onCycleFound(String cycleId, int cycleLength, int periodLength) {
                     Intent intent = new Intent(Dashboard.this, Fertility.class);
                     intent.putExtra("safeEmailKey", safeEmailKey);
                     intent.putExtra("cycleId", cycleId);
-                    intent.putExtra("cycleLength", cycleLength);
+                    intent.putExtra("cycleLength",cycleLength);
+                    intent.putExtra("periodLength", periodLength); // ✅ actual period length
                     startActivity(intent);
                 }
 
@@ -141,7 +169,6 @@ public class Dashboard extends AppCompatActivity {
                     // Toast already shown in helper
                 }
             });
-
         });
 
         btnOpenProfile.setOnClickListener(v -> {
@@ -149,7 +176,5 @@ public class Dashboard extends AppCompatActivity {
             openProfileIntent.putExtra("safeEmailKey", safeEmailKey);
             startActivity(openProfileIntent);
         });
-
-
     }
 }

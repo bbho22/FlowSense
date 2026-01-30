@@ -60,17 +60,19 @@ public class Fertility extends AppCompatActivity {
         String safeEmailKey = getIntent().getStringExtra("safeEmailKey");
         String cycleId = getIntent().getStringExtra("cycleId");
 
+        int periodLength = getIntent().getIntExtra("periodLength", -1);
+
 
 
         // Calculate dynamic distribution
-        int menstrualDays = 5;
-        int follicularDays = 7;
+        int menstrualDays = periodLength;
+        int follicularDays = periodLength + 1;
         int ovulationDays = 4;
         int lutealDays = cycleLength - (menstrualDays + follicularDays + ovulationDays);
 
         ArrayList<PieEntry> entries = new ArrayList<>();
-        entries.add(new PieEntry(menstrualDays, "Menstrual (1-5)"));
-        entries.add(new PieEntry(follicularDays, "Follicular (6-12)"));
+        entries.add(new PieEntry(menstrualDays, "Menstrual (0-" + periodLength + ")"));
+        entries.add(new PieEntry(follicularDays, "Follicular (" + follicularDays + "-12)"));
         entries.add(new PieEntry(ovulationDays, "Ovulation (13-16)"));
         entries.add(new PieEntry(lutealDays, "Luteal (17-" + cycleLength + ")"));
 

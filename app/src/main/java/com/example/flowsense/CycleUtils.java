@@ -11,11 +11,11 @@ import java.util.Locale;
 public class CycleUtils {
     // Callback interface
     public interface OnCycleCheckListener {
-        void onCycleFound(String cycleId);
+        void onCycleFound(String cycleId, int cycleLength, int periodLength);
         void onNoCycle();
     }
 
-    // Helper method to get current cycleId
+    // ✅ Helper method to get current cycleId, cycleLength, and periodLength
     public static void getCurrentCycleId(Context context, DatabaseReference dbRef, OnCycleCheckListener listener) {
         dbRef.child("cycles").limitToLast(1).get().addOnSuccessListener(snapshot -> {
             if (snapshot.exists()) {
@@ -24,15 +24,26 @@ public class CycleUtils {
                     String startDate = cycleSnap.child("startDate").getValue(String.class);
                     String endDate = cycleSnap.child("endDate").getValue(String.class);
 
+                    // ✅ Pick up cycleLength safely
+                    Long cycleLengthLong = cycleSnap.child("cycleLength").getValue(Long.class);
+                    int cycleLength = cycleLengthLong != null ? cycleLengthLong.intValue() : -1;
+
+                    // ✅ Pick up periodLength safely
+                    Long periodLengthLong = cycleSnap.child("periodLength").getValue(Long.class);
+                    int periodLength = periodLengthLong != null ? periodLengthLong.intValue() : -1;
+
                     try {
-                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-M-d", Locale.getDefault());
-                        Date todayDate = sdf.parse(new SimpleDateFormat("yyyy-M-d", Locale.getDefault()).format(new Date()));
+                        // ✅ Use consistent ISO-style format with leading zeros
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+
+                        // Today’s date in same format
+                        Date todayDate = sdf.parse(sdf.format(new Date()));
                         Date start = sdf.parse(startDate);
                         Date end = sdf.parse(endDate);
 
                         if (todayDate != null && start != null && end != null) {
                             if (!todayDate.before(start) && !todayDate.after(end)) {
-                                listener.onCycleFound(cycleId);
+                                listener.onCycleFound(cycleId, cycleLength, periodLength);
                                 return;
                             }
                         }

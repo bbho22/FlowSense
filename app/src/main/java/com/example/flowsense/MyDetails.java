@@ -33,7 +33,7 @@ public class MyDetails extends AppCompatActivity {
     private DatabaseReference usersRef;
     private String origFname, origSname, origCycle, origAge, origLocation, origPhone;
 
-    // Views as class fields
+    // Views
     private TextInputEditText inputFname, inputSname, inputCycleLength, inputAge, inputLocation, inputPhone;
     private MaterialButton btnSaveProfile, btnUpdatePassword;
 
@@ -60,8 +60,7 @@ public class MyDetails extends AppCompatActivity {
         btnSaveProfile = findViewById(R.id.btn_save_profile);
         btnUpdatePassword = findViewById(R.id.btn_update_password);
 
-        // Disable button initially
-        //btnSaveProfile.setEnabled(false);
+        btnSaveProfile.setEnabled(false);
 
         // Firebase reference
         usersRef = FirebaseDatabase.getInstance("https://flowsense-1f327-default-rtdb.asia-southeast1.firebasedatabase.app")
@@ -76,20 +75,26 @@ public class MyDetails extends AppCompatActivity {
                     if (snapshot.exists()) {
                         origFname = snapshot.child("firstName").getValue(String.class);
                         origSname = snapshot.child("secondName").getValue(String.class);
-                        origCycle = snapshot.child("cycleLength").getValue(String.class);
-                        origAge = snapshot.child("age").getValue(String.class);
+
+                        // cycleLength stored as number
+                        Long cycleLengthLong = snapshot.child("cycleLength").getValue(Long.class);
+                        origCycle = cycleLengthLong != null ? String.valueOf(cycleLengthLong) : "NA";
+
+                        // age stored as number
+                        Long ageLong = snapshot.child("age").getValue(Long.class);
+                        origAge = ageLong != null ? String.valueOf(ageLong) : "NA";
+
                         origLocation = snapshot.child("location").getValue(String.class);
                         origPhone = snapshot.child("phone").getValue(String.class);
 
                         // Populate fields
-                        inputFname.setText(origFname);
-                        inputSname.setText(origSname);
+                        inputFname.setText(origFname != null ? origFname : "NA");
+                        inputSname.setText(origSname != null ? origSname : "NA");
                         inputCycleLength.setText(origCycle);
                         inputAge.setText(origAge);
-                        inputLocation.setText(origLocation);
-                        inputPhone.setText(origPhone);
+                        inputLocation.setText(origLocation != null ? origLocation : "NA");
+                        inputPhone.setText(origPhone != null ? origPhone : "NA");
 
-                        // Watch for changes
                         addTextWatchers();
                     }
                 }
@@ -101,16 +106,13 @@ public class MyDetails extends AppCompatActivity {
             });
         }
 
-        // Save updates
         btnSaveProfile.setOnClickListener(v -> updateProfile());
     }
 
     private void addTextWatchers() {
         TextWatcher watcher = new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
-                checkIfChanged();
-            }
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) { checkIfChanged(); }
             @Override public void afterTextChanged(Editable s) {}
         };
 
@@ -138,22 +140,34 @@ public class MyDetails extends AppCompatActivity {
         Map<String, Object> updates = new HashMap<>();
         updates.put("firstName", getText(inputFname));
         updates.put("secondName", getText(inputSname));
-        updates.put("cycleLength", getText(inputCycleLength));
-        updates.put("age", getText(inputAge));
+
+        // cycleLength: store as number if valid
+        try {
+            updates.put("cycleLength", Long.parseLong(getText(inputCycleLength)));
+        } catch (NumberFormatException e) {
+            updates.put("cycleLength", "NA");
+        }
+
+        // age: store as number if valid
+        try {
+            updates.put("age", Long.parseLong(getText(inputAge)));
+        } catch (NumberFormatException e) {
+            updates.put("age", "NA");
+        }
+
         updates.put("location", getText(inputLocation));
         updates.put("phone", getText(inputPhone));
 
         usersRef.updateChildren(updates)
                 .addOnSuccessListener(aVoid -> {
                     Toast.makeText(this, "Profile updated!", Toast.LENGTH_LONG).show();
-                    // Reset originals
                     origFname = getText(inputFname);
                     origSname = getText(inputSname);
                     origCycle = getText(inputCycleLength);
                     origAge = getText(inputAge);
                     origLocation = getText(inputLocation);
                     origPhone = getText(inputPhone);
-                    btnSaveProfile.setEnabled(false); // disable again until next change
+                    btnSaveProfile.setEnabled(false);
                 })
                 .addOnFailureListener(e ->
                         Toast.makeText(this, "Update failed: " + e.getMessage(), Toast.LENGTH_LONG).show());
@@ -162,6 +176,5 @@ public class MyDetails extends AppCompatActivity {
     private String getText(TextInputEditText editText) {
         return editText.getText() != null ? editText.getText().toString().trim() : "";
     }
-
 
 }

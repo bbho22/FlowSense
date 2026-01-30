@@ -65,76 +65,82 @@ public class Cycle extends AppCompatActivity {
         btnSaveCycle = findViewById(R.id.btn_save_cycle);
         recyclerCycles = findViewById(R.id.recycler_cycles);
 
-
-        // Assume cycleLength comes from Dashboard intent or Firebase
         int cycleLength = getIntent().getIntExtra("cycleLength", 28);
         String safeEmailKey = getIntent().getStringExtra("safeEmailKey");
 
+        // Auto-update summary when start date picked
         dateStart.setOnDateChangedListener((view, year, monthOfYear, dayOfMonth) -> {
-            Calendar startCal = Calendar.getInstance();
-            startCal.set(year, monthOfYear, dayOfMonth);
-
-            Calendar endCal = (Calendar) startCal.clone();
-
-            if (radioRegular.isChecked()) {
-                // Regular cycle: straight cycleLength days
-                endCal.add(Calendar.DAY_OF_MONTH, cycleLength - 1);
-            } else {
-                // Irregular cycle: allow range (26–35 days)
-                endCal.add(Calendar.DAY_OF_MONTH, 26 - 1); // default min
-                // You can later show dialog to let user pick within range
-            }
-
-            // Update End Date Picker
-            dateEnd.updateDate(endCal.get(Calendar.YEAR),
-                    endCal.get(Calendar.MONTH),
-                    endCal.get(Calendar.DAY_OF_MONTH));
-
-            // Update summary text
             tvSummary.setText("Cycle length: " + cycleLength + " days");
         });
 
-
-        // event to save
         btnSaveCycle.setOnClickListener(v -> {
-            int startYear = dateStart.getYear();
-            int startMonth = dateStart.getMonth() + 1;
-            int startDay = dateStart.getDayOfMonth();
-            String startDate = startYear + "-" + startMonth + "-" + startDay;
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 
-            int endYear = dateEnd.getYear();
-            int endMonth = dateEnd.getMonth() + 1;
-            int endDay = dateEnd.getDayOfMonth();
-            String endDate = endYear + "-" + endMonth + "-" + endDay;
+            // Cycle start (also menstruation start)
+            Calendar mensStartCal = new GregorianCalendar(
+                    dateStart.getYear(),
+                    dateStart.getMonth(),
+                    dateStart.getDayOfMonth()
+            );
+            String cycleStartDate = sdf.format(mensStartCal.getTime());
+            String mensStartDate = cycleStartDate;
 
+            // Menstruation end
+            Calendar mensEndCal = new GregorianCalendar(
+                    dateEnd.getYear(),
+                    dateEnd.getMonth(),
+                    dateEnd.getDayOfMonth()
+            );
+            String mensEndDate = sdf.format(mensEndCal.getTime());
+
+            // Validation
+            if (mensEndCal.before(mensStartCal)) {
+                Toast.makeText(Cycle.this,
+                        "Menstruation end date cannot be before start date",
+                        Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            // Period length
+            long diffMillis = mensEndCal.getTimeInMillis() - mensStartCal.getTimeInMillis();
+            int periodLength = (int) (diffMillis / (1000 * 60 * 60 * 24)) + 1;
+
+            // Cycle type
             String cycleType = radioRegular.isChecked() ? "regular" : "irregular";
 
-            Calendar cal = new GregorianCalendar(startYear, startMonth - 1, startDay);
-            String cycleId = "cycle_" + new SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(cal.getTime());
+            // Cycle end
+            Calendar cycleEndCal = (Calendar) mensStartCal.clone();
+            if (cycleType.equals("regular")) {
+                cycleEndCal.add(Calendar.DAY_OF_MONTH, cycleLength - 1);
+            } else {
+                cycleEndCal.add(Calendar.DAY_OF_MONTH, 26 - 1);
+            }
+            String cycleEndDate = sdf.format(cycleEndCal.getTime());
 
+            // Unique ID
+            String cycleId = "cycle_" + new SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+                    .format(mensStartCal.getTime());
 
-
+            // Save data
             Map<String, Object> cycleData = new HashMap<>();
-            cycleData.put("startDate", startDate);
-            cycleData.put("endDate", endDate);
+            cycleData.put("startDate", cycleStartDate);
+            cycleData.put("endDate", cycleEndDate);
             cycleData.put("cycleType", cycleType);
             cycleData.put("cycleLength", cycleLength);
+            cycleData.put("mensStartDate", mensStartDate);
+            cycleData.put("mensEndDate", mensEndDate);
+            cycleData.put("periodLength", periodLength);
 
             DatabaseReference userRef = FirebaseDatabase.getInstance("https://flowsense-1f327-default-rtdb.asia-southeast1.firebasedatabase.app")
                     .getReference("users")
                     .child(safeEmailKey);
 
             userRef.child("cycles").child(cycleId).setValue(cycleData)
-                    .addOnSuccessListener(aVoid -> {
-                        Toast.makeText(Cycle.this, "Cycle saved successfully!", Toast.LENGTH_SHORT).show();
-                    })
-                    .addOnFailureListener(e -> {
-                        Toast.makeText(Cycle.this, "Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                    });
+                    .addOnSuccessListener(aVoid -> Toast.makeText(Cycle.this, "Cycle saved successfully!", Toast.LENGTH_SHORT).show())
+                    .addOnFailureListener(e -> Toast.makeText(Cycle.this, "Failed: " + e.getMessage(), Toast.LENGTH_LONG).show());
         });
 
-
-        // fetch data
+        // Fetch cycles
         recyclerCycles.setLayoutManager(new LinearLayoutManager(this));
         CycleAdapter cycleAdapter = new CycleAdapter(new ArrayList<CycleModel>(), Cycle.this);
         recyclerCycles.setAdapter(cycleAdapter);
@@ -150,22 +156,18 @@ public class Cycle extends AppCompatActivity {
                 for (DataSnapshot cycleSnap : snapshot.getChildren()) {
                     CycleModel cycle = cycleSnap.getValue(CycleModel.class);
                     if (cycle != null) {
-                        // ✅ enrich the model with IDs
-                        cycle.setCycleId(cycleSnap.getKey());       // Firebase node key
-                        cycle.setSafeEmailKey(safeEmailKey);        // user context
+                        cycle.setCycleId(cycleSnap.getKey());
+                        cycle.setSafeEmailKey(safeEmailKey);
                         cycleList.add(cycle);
                     }
                 }
                 cycleAdapter.updateData(cycleList);
             }
 
-
-
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Toast.makeText(Cycle.this, "Error: " + error.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
-
     }
 }
