@@ -12,6 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FlowSense">
         <activity
+            android:name=".AccountRequest"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="false" />
         <activity

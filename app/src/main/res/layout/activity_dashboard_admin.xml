@@ -5,7 +5,6 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
     tools:context=".DashboardAdmin">
 
     <LinearLayout
@@ -14,7 +13,8 @@
         android:orientation="vertical"
         android:padding="24dp"
         android:gravity="center_horizontal">
-        <!-- Custom Toolbar -->
+
+        <!-- Toolbar -->
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
@@ -23,7 +23,6 @@
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
 
-            <!-- Left side: Name -->
             <TextView
                 android:id="@+id/tv_toolbar_name"
                 android:layout_width="wrap_content"
@@ -34,7 +33,6 @@
                 android:textSize="18sp"
                 android:layout_gravity="start"/>
 
-            <!-- Right side: Logout -->
             <Button
                 android:id="@+id/btn_logout"
                 android:layout_width="wrap_content"
@@ -45,15 +43,12 @@
                 android:layout_gravity="end"/>
         </androidx.appcompat.widget.Toolbar>
 
-
-
-
-        <!-- Cycle Tracking Card -->
+        <!-- Total Users Card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
             android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
             app:cardBackgroundColor="@color/blue"
             app:cardCornerRadius="12dp"
             app:cardElevation="4dp">
@@ -65,15 +60,16 @@
                 android:padding="16dp">
 
                 <TextView
+                    android:id="@+id/tv_total_users"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Total Users  2345"
+                    android:text="Total Users 0"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="@color/white"/>
 
                 <Button
-                    android:id="@+id/btn_cycle"
+                    android:id="@+id/btn_view_users"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="View Users"
@@ -83,6 +79,7 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- Total Admins Card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -98,24 +95,26 @@
                 android:padding="16dp">
 
                 <TextView
+                    android:id="@+id/tv_total_admins"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Total Admins 45"
+                    android:text="Total Admins 0"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="@color/white"/>
 
                 <Button
-                    android:id="@+id/btn_fertility"
+                    android:id="@+id/btn_manage_admins"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Admin management"
+                    android:text="Manage Admins"
                     android:textColor="@color/white"
                     android:backgroundTint="@color/blue"
                     android:layout_marginTop="8dp"/>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- Inactive Users Card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -131,24 +130,26 @@
                 android:padding="16dp">
 
                 <TextView
+                    android:id="@+id/tv_inactive_users"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Total inactive users 465"
+                    android:text="Total Inactive Users 0"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="@color/white"/>
 
                 <Button
+                    android:id="@+id/btn_manage_inactive"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="View inactive"
+                    android:text="Manage Inactive Users"
                     android:textColor="@color/white"
                     android:backgroundTint="@color/blue"
                     android:layout_marginTop="8dp"/>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Symptom Logging Card -->
+        <!-- Blocked Users Card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -164,26 +165,24 @@
                 android:padding="16dp">
 
                 <TextView
+                    android:id="@+id/tv_blocked_users"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Total Blocked Users  24"
+                    android:text="Total Blocked Users 0"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="@color/white"/>
 
                 <Button
-                    android:id="@+id/btn_symptoms"
+                    android:id="@+id/btn_block_list"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Open block list"
+                    android:text="Open Block List"
                     android:textColor="@color/white"
                     android:backgroundTint="@color/red"
                     android:layout_marginTop="8dp"/>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Fertility Prediction Card -->
-
     </LinearLayout>
-
 </ScrollView>

@@ -161,6 +161,8 @@ public class MainActivity extends AppCompatActivity {
                     userMap.put("cycleLength", finalCycleLength);
                     userMap.put("createdAt", System.currentTimeMillis());
                     userMap.put("uid", firebaseUser.getUid());
+                    userMap.put("role", "user");
+                    userMap.put("isActive",true);
 
                     Log.d("FirebaseDB", "Attempting to write user data...");
 

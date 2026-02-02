@@ -26,6 +26,7 @@ import android.widget.Toast;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class Login extends AppCompatActivity {
     private FirebaseAuth mAuth;
@@ -101,25 +102,58 @@ public class Login extends AppCompatActivity {
                 mAuth.signInWithEmailAndPassword(email, password)
                         .addOnSuccessListener(authResult -> {
                             Toast.makeText(Login.this, "Login successful", Toast.LENGTH_SHORT).show();
+
                             SharedPreferences prefs = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
                             SharedPreferences.Editor editor = prefs.edit();
                             editor.putBoolean("remember", checkboxRemember.isChecked());
                             editor.apply();
+
                             // Sanitize email key
                             String safeEmailKey = email.replace(".", "_dot_")
                                     .replace("@", "_at_");
 
-                            // Go to Dashboard
-                            Intent intent = new Intent(Login.this, Dashboard.class);
-                            intent.putExtra("safeEmailKey", safeEmailKey);
-                            startActivity(intent);
-                            finish();
+                            // Fetch user profile from Firebase
+                            DatabaseReference userRef = FirebaseDatabase.getInstance("https://flowsense-1f327-default-rtdb.asia-southeast1.firebasedatabase.app")
+                                    .getReference("users")
+                                    .child(safeEmailKey);
+
+                            userRef.get().addOnSuccessListener(snapshot -> {
+                                if (snapshot.exists()) {
+                                    Boolean isActive = snapshot.child("isActive").getValue(Boolean.class);
+                                    String role = snapshot.child("role").getValue(String.class);
+
+                                    if ("admin".equalsIgnoreCase(role)) {
+                                        // Admin → DashboardAdmin
+                                        Intent intent = new Intent(Login.this, DashboardAdmin.class);
+                                        intent.putExtra("safeEmailKey", safeEmailKey);
+                                        startActivity(intent);
+                                        finish();
+                                    } else {
+                                        if (isActive != null && isActive) {
+                                            // Active user → Dashboard
+                                            Intent intent = new Intent(Login.this, Dashboard.class);
+                                            intent.putExtra("safeEmailKey", safeEmailKey);
+                                            startActivity(intent);
+                                            finish();
+                                        } else {
+                                            // Inactive user → AccountRequest
+                                            Intent intent = new Intent(Login.this, AccountRequest.class);
+                                            intent.putExtra("safeEmailKey", safeEmailKey);
+                                            startActivity(intent);
+                                            finish();
+                                        }
+                                    }
+                                } else {
+                                    Toast.makeText(Login.this, "User profile not found.", Toast.LENGTH_LONG).show();
+                                }
+                            }).addOnFailureListener(e -> {
+                                Toast.makeText(Login.this, "Failed to load user profile: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                            });
+
                         })
                         .addOnFailureListener(e -> {
                             Toast.makeText(Login.this, "Login failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
                         });
-
-
             }
         });
 
