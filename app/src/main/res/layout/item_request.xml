@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    android:padding="16dp"
+    android:background="@color/white"
+    android:elevation="4dp"
+    android:radius="8dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:background="@color/ivory"
+        android:orientation="vertical">
+
+        <!-- Email -->
+        <TextView
+            android:id="@+id/tv_email"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="user@example.com"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"/>
+
+        <!-- Message -->
+        <TextView
+            android:id="@+id/tv_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Please activate my account"
+            android:textSize="14sp"
+            android:textColor="@color/black"
+            android:layout_marginTop="4dp"/>
+
+        <!-- Action Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp">
+
+            <Button
+                android:id="@+id/btn_activate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Activate"
+                android:backgroundTint="@android:color/holo_green_dark"
+                android:textColor="@android:color/white"/>
+
+            <Button
+                android:id="@+id/btn_decline"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Decline"
+                android:layout_marginStart="16dp"
+                android:backgroundTint="@android:color/holo_red_dark"
+                android:textColor="@android:color/white"/>
+        </LinearLayout>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

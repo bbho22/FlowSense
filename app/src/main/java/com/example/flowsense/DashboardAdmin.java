@@ -3,6 +3,7 @@ package com.example.flowsense;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -20,12 +21,14 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class DashboardAdmin extends AppCompatActivity {
     private TextView tvToolbarName, tvTotalUsers, tvTotalAdmins, tvInactiveUsers, tvBlockedUsers;
-    private Button btnLogout, btnViewUsers, btnManageAdmins, btnManageInactive, btnBlockList;
+    private Button btnLogout, btnViewUsers, btnManageAdmins, btnManageInactive, btnUserRequest;
     private DatabaseReference dbRef;
 
     @Override
@@ -52,8 +55,7 @@ public class DashboardAdmin extends AppCompatActivity {
         btnViewUsers = findViewById(R.id.btn_view_users);
         btnManageAdmins = findViewById(R.id.btn_manage_admins);
         btnManageInactive = findViewById(R.id.btn_manage_inactive);
-        btnBlockList = findViewById(R.id.btn_block_list);
-
+        btnUserRequest = findViewById(R.id.btn_user_request);
         // Get safeEmailKey from intent
         String safeEmailKey = getIntent().getStringExtra("safeEmailKey");
 
@@ -102,6 +104,27 @@ public class DashboardAdmin extends AppCompatActivity {
             Toast.makeText(DashboardAdmin.this, "Failed to load counts: " + e.getMessage(), Toast.LENGTH_LONG).show();
         });
 
+
+        //count pending
+        DatabaseReference requestsRef = FirebaseDatabase.getInstance("https://flowsense-1f327-default-rtdb.asia-southeast1.firebasedatabase.app")
+                .getReference("activation_requests");
+
+        // Count pending requests
+        requestsRef.orderByChild("status").equalTo("pending")
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        long pendingCount = snapshot.getChildrenCount();
+                        tvBlockedUsers.setText("User Request " + pendingCount);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        tvBlockedUsers.setText("Error loading requests");
+                    }
+                });
+
+
         // Logout
         btnLogout.setOnClickListener(v -> {
             FirebaseAuth.getInstance().signOut();
@@ -115,19 +138,19 @@ public class DashboardAdmin extends AppCompatActivity {
 
         // Navigation buttons
         btnViewUsers.setOnClickListener(v -> {
-            //startActivity(new Intent(DashboardAdmin.this, UserManagementActivity.class));
+            startActivity(new Intent(DashboardAdmin.this, UserManagementActivity.class));
         });
 
         btnManageAdmins.setOnClickListener(v -> {
-            // startActivity(new Intent(DashboardAdmin.this, AdminManagementActivity.class));
+            startActivity(new Intent(DashboardAdmin.this, AdminManagementActivity.class));
         });
 
         btnManageInactive.setOnClickListener(v -> {
-            //startActivity(new Intent(DashboardAdmin.this, InactiveUsersActivity.class));
+            startActivity(new Intent(DashboardAdmin.this, InactiveUsersActivity.class));
         });
 
-        btnBlockList.setOnClickListener(v -> {
-            //startActivity(new Intent(DashboardAdmin.this, BlockedUsersActivity.class));
+        btnUserRequest.setOnClickListener(v -> {
+            startActivity(new Intent(DashboardAdmin.this, UseRequestManagement.class));
         });
     }
 }

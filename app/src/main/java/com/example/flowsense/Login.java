@@ -54,6 +54,9 @@ public class Login extends AppCompatActivity {
         etEmail = findViewById(R.id.et_email);
         etPassword = findViewById(R.id.et_password);
 
+        TextView tvForgotPassword = findViewById(R.id.tv_forgot_password);
+
+
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -156,6 +159,11 @@ public class Login extends AppCompatActivity {
                         });
             }
         });
+        // forgot password
+        tvForgotPassword.setOnClickListener(v -> {
+            startActivity(new Intent(Login.this, ForgotPasswordActivity.class));
+        });
+
 
     }
 }

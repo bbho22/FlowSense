@@ -12,6 +12,21 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FlowSense">
         <activity
+            android:name=".UseRequestManagement"
+            android:exported="false" />
+        <activity
+            android:name=".InactiveUsersActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AdminManagementActivity"
+            android:exported="false" />
+        <activity
+            android:name=".UserManagementActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ForgotPasswordActivity"
+            android:exported="false" />
+        <activity
             android:name=".AccountRequest"
             android:exported="false" />
         <activity

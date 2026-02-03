@@ -27,6 +27,7 @@
         android:minLines="4"
         android:gravity="top|start"/>
     <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_send_request"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Send Request"
@@ -36,8 +37,9 @@
         android:backgroundTint="@color/green"
         style="@style/Widget.MaterialComponents.Button"
         android:layout_marginTop="16dp"/>
-    <TextView
 
+    <TextView
+        android:id="@+id/tv_back_login"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="22sp"
@@ -45,6 +47,7 @@
         android:text="Back to login"
         android:textColor="@color/blue"
         android:layout_marginTop="16dp"/>
+
 
 
 </LinearLayout>
